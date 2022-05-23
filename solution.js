@@ -1,6 +1,6 @@
-import { readFileSync } from 'fs';
+const fs = require('fs');
 
-const program = [...readFileSync('input.hand', 'utf8')];
+const program = [...fs.readFileSync('input.hand', 'utf8')];
 const memory = [0];
 
 let index = 0;
