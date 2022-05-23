@@ -1,11 +1,10 @@
 import { readFileSync } from 'fs';
 
 const program = [...readFileSync('input.hand', 'utf8')];
-
 const memory = [0];
 
-let pointer = 0;
 let index = 0;
+let pointer = 0;
 
 const moveToNextCell = () => {
     ++pointer;
@@ -47,7 +46,7 @@ const endLoop = () => {
 }
 
 const displayCellValue = () => {
-    process.stdout.write(String.fromCharCode(memory[pointer]))
+    process.stdout.write(String.fromCharCode(memory[pointer]));
 }
 
 const instructions = {
@@ -57,7 +56,7 @@ const instructions = {
     "👇": decreaseCellValue,
     "🤜": startLoop,
     "🤛": endLoop,
-    "👊": displayCellValue,
+    "👊": displayCellValue
 }
 
 while(index < program.length) {
