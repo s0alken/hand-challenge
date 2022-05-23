@@ -1,49 +1,67 @@
-const fs = require('fs');
+import { readFileSync } from 'fs';
 
-const instructions = [...fs.readFileSync(process.argv[2] || 'input.hand', 'utf-8')];
-let cursor = 0;
-const data = [0];
+const program = [...readFileSync('input.hand', 'utf8')];
+
+const memory = [0];
+
 let pointer = 0;
-const loops = {};
+let index = 0;
 
-const stack = [];
-instructions.forEach((instruction, index) => {
-  if (instruction === '🤜') {
-    stack.push(index);
-  } else if (instruction === '🤛') {
-    const loopStart = stack.pop();
-    loops[loopStart] = index;
-    loops[index] = loopStart;
-  }
-});
-
-const actions = {
-  '👉': () => {
-    pointer += 1;
-    if (pointer >= data.length) {
-      data.push(0);
-    }
-  },
-  '👈': () => pointer -= 1,
-  '👆': () => data[pointer] = data[pointer] === 255 ? 0 : data[pointer] + 1,
-  '👇': () => data[pointer] = data[pointer] === 0 ? 255 : data[pointer] - 1,
-  '👊': () => process.stdout.write(String.fromCharCode(data[pointer])),
-  '🤜': () => {
-    if (data[pointer] === 0) {
-      cursor = loops[cursor];
-    }
-  },
-  '🤛': () => {
-    if (data[pointer] !== 0) {
-      cursor = loops[cursor];
-    }
-  },
+const moveToNextCell = () => {
+    ++pointer;
+    if(memory[pointer] === undefined) memory.push(0);
 }
 
-while (cursor < instructions.length) {
-  const instruction = instructions[cursor];
-  actions[instruction]();
-  cursor += 1;
+const moveToPrevCell = () => {
+    --pointer;
 }
 
+const increaseCellValue = () => {
+    memory[pointer] =  memory[pointer] + 1 > 255 ? 0 : memory[pointer] + 1;
+}
+
+const decreaseCellValue = () => {
+    memory[pointer] =  memory[pointer] - 1 < 0 ? 255 : memory[pointer] - 1;
+}
+
+const startLoop = () => {
+    if(memory[pointer] === 0) {
+        let counter = 1;
+        while(counter !== 0) {
+            ++index;
+            if(program[index] === "🤜") ++counter;
+            if(program[index] === "🤛") --counter;
+        }
+    }
+}
+
+const endLoop = () => {
+    if(memory[pointer] !== 0) {
+        let counter = 1;
+        while(counter !== 0) {
+            --index;
+            if(program[index] === "🤛") ++counter;
+            if(program[index] === "🤜") --counter;
+        }
+    }
+}
+
+const displayCellValue = () => {
+    process.stdout.write(String.fromCharCode(memory[pointer]))
+}
+
+const instructions = {
+    "👉": moveToNextCell,
+    "👈": moveToPrevCell,
+    "👆": increaseCellValue,
+    "👇": decreaseCellValue,
+    "🤜": startLoop,
+    "🤛": endLoop,
+    "👊": displayCellValue,
+}
+
+while(index < program.length) {
+    instructions[program[index]]();
+    index++;
+}
 
